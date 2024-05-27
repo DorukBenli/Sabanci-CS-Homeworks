@@ -1,0 +1,22 @@
+1-ok ⭕
+2-ok ⭕
+3-ok ⭕
+4-ok ⭕
+5-error ⭕
+6-error ⭕
+7-ok⭕
+8-error ⭕
+9-ok ⭕
+10-ok 
+11-ok
+12-ok
+
+bugs:
+
+does not work correctly for empty files
+
+mail block: Mail and from keywords followed by email adress, for space inside end mail we may have muktiple spaces but cannot be 0. 
+
+3)
+ 3.1 = a set statement starts with tSET, then tIDENT then tLPR TSTR then tRPR(can both exists in and out of mail blocks) done
+ 3.2 = tSEND tLBR tIDENT or tSTRING tRBR tTO recipient_list 

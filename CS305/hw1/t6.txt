@@ -1,0 +1,8 @@
+8_tCOLON
+8_tCOLON
+8_tSCHEDULE
+8_tRBR
+8_tIDENT_(Ali)
+8_tAT
+8_tFROM
+8_tMAIL

@@ -1,0 +1,85 @@
+%{
+#include <stdio.h>
+#include <string.h>
+#include <ctype.h>
+int comment_depth = 0;
+%}
+
+%option yylineno
+
+%x COMMENT ILLEGAL_EMAIL
+
+WHITESPACE [ \t\n]
+IDENT	[a-zA-Z_][a-zA-Z0-9_]*
+STR	\"([^\"]*)\"
+local_part [a-zA-Z0-9_]+([-._][a-zA-Z0-9_]+)*
+label [a-zA-Z0-9]+(-[a-zA-Z0-9]+)*
+domain {label}\.[a-zA-Z0-9]+(-[a-zA-Z0-9]+)*(\.{label})?
+EMAIL {local_part}@{domain}
+DATE	([0-9]{2})[/]([0-9]{2})[/]([0-9]{4})|([0-9]{2})[-]([0-9]{2})[-]([0-9]{4})|([0-9]{2})[.]([0-9]{2})[.]([0-9]{4})
+TIME	([0-9]{2}):([0-9]{2})
+
+%%
+
+"//".* ;
+"/*" { comment_depth++; BEGIN(COMMENT); }
+<COMMENT>"/*" { comment_depth++; }
+<COMMENT>"*/" { 
+    comment_depth--; 
+    if (comment_depth == 0) 
+        BEGIN(INITIAL); 
+}
+<COMMENT>.|\n ;
+"Mail" printf("%d_tMAIL\n", yylineno);
+"end"{WHITESPACE}+"Mail" printf("%d_tENDMAIL\n", yylineno);
+"schedule" printf("%d_tSCHEDULE\n", yylineno);
+"end"{WHITESPACE}+"schedule" printf("%d_tENDSCHEDULE\n", yylineno);
+"send" printf("%d_tSEND\n", yylineno);
+"to" printf("%d_tTO\n", yylineno);
+"from" printf("%d_tFROM\n", yylineno);
+"set" printf("%d_tSET\n", yylineno);
+"," printf("%d_tCOMMA\n", yylineno);
+":" printf("%d_tCOLON\n", yylineno);
+"(" printf("%d_tLPR\n", yylineno);
+")" printf("%d_tRPR\n", yylineno);
+"[" printf("%d_tLBR\n", yylineno);
+"]" printf("%d_tRBR\n", yylineno);
+"@" printf("%d_tAT\n", yylineno);
+{IDENT} printf("%d_tIDENT_(%s)\n", yylineno, yytext);
+{STR} { 
+    yytext[strlen(yytext)-1] = '\0'; 
+    int newlines = 0;
+    char *p;
+    for (p = yytext; *p; p++) {
+        if (*p == '\n') {
+            newlines++;
+        }
+    }
+    printf("%d_tSTRING_(%s)\n", yylineno - newlines, yytext+1); 
+}
+{EMAIL} printf("%d_tADDRESS_(%s)\n", yylineno, yytext);
+{DATE} {
+    char day[3], month[3], year[5];
+    if(strchr(yytext, '/')) {
+        sscanf(yytext, "%2s/%2s/%4s", day, month, year);
+    } else if(strchr(yytext, '-')) {
+        sscanf(yytext, "%2s-%2s-%4s", day, month, year);
+    } else if(strchr(yytext, '.')) {
+        sscanf(yytext, "%2s.%2s.%4s", day, month, year);
+    }
+    printf("%d_tDATE_(Day_%s_Month_%s_Year_%s)\n", yylineno, day, month, year);
+}
+{TIME} { 
+    char hour[3], minute[3];
+    sscanf(yytext, "%2s:%2s", hour, minute);
+    printf("%d_tTIME_(Hour_%s_Minute_%s)\n", yylineno, hour, minute);
+}
+{WHITESPACE}+ ;
+. printf("%d_ILLEGAL_CHARACTER_(%s)\n", yylineno, yytext);
+
+%%
+
+int main(){
+    yylex();
+    return 0;
+}
