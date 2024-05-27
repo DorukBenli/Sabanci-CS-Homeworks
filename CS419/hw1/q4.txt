@@ -1,0 +1,9 @@
+algoritma:
+
+-4 SE elementi oluştur, bir de ek olarak background elementi oluştur.(slaytta yeşil background.)
+
+her bir S.E için --> tekrarlı şekilde, backgorund ile hit or miss yapıyorsun. Ardından resimle birleştiriyorsun, her birine devam ediyorsun. hepsinin unionunu alıyorsun.(B1 için tekrar tekrar birleştirme yapıyorsun ta ki extend edilemeyene kadar.)
+
+eline convex hull gelmiyor.(orjinal image ve eline geleni kesişimini al.)
+
+hit or miss için background lazım.
